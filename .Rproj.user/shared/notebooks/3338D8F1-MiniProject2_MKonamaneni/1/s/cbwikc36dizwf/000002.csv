@@ -1,0 +1,9 @@
+"0","```r
+# Calculate mode for categorical variables
+
+mode_team_name <- worldcup_matches %>%
+  count(home_team_name) %>%
+  filter(n == max(n)) %>%
+  select(home_team_name)
+mode_team_name
+```"

@@ -1,0 +1,11 @@
+"0","```r
+# Create a histogram to visualize the age distribution based on gender
+ggplot(marathon_data, aes(x = Age, fill = M_F)) +
+  geom_histogram(aes(y = ..density..), binwidth = 2, position = \"identity\", alpha = 0.5 ) + 
+  geom_density(alpha = 0.3) +
+  labs(title = \"Age Distribution based on Gender\",
+       x = \"Age\",
+       y = \"Density\") +
+  guides(fill=guide_legend(title=\"M/F\")) +
+  theme_minimal()
+```"

@@ -1,0 +1,14 @@
+"0","```r
+# Count the frequency of values in a column
+table(worldcup_matches$Stage)
+```"
+"1","
+                   Final              First round                  Group 1                  Group 2                  Group 3                  Group 4                  Group 5 
+                      20                        9                       62                       59                       56                       55                        6 
+                 Group 6                  Group A                  Group B                  Group C                  Group D                  Group E                  Group F 
+                      12                       60                       60                       48                       48                       48                       48 
+                 Group G                  Group H    Match for third place Play-off for third place        Preliminary round           Quarter-finals              Round of 16 
+                      30                       30                       15                        2                        8                       66                       72 
+             Semi-finals              Third place 
+                      36                        2 
+"

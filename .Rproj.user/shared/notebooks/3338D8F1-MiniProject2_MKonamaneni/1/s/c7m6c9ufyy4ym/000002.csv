@@ -1,0 +1,29 @@
+"0","```r
+# Assuming you want to rename the \"Win conditions\" column to \"Outcome\"
+colnames(worldcup_matches)[6] <- \"home_team_name\"
+colnames(worldcup_matches)[7] <- \"home_team_goals\"
+colnames(worldcup_matches)[8] <- \"away_team_goals\"
+colnames(worldcup_matches)[9] <- \"away_team_name\"
+colnames(worldcup_matches)[10] <- \"win_conditions\"
+colnames(worldcup_matches)[12] <- \"half_time_home_goals\"
+colnames(worldcup_matches)[13] <- \"half_time_away_goals\"
+colnames(worldcup_matches)[15] <- \"assistant1\"
+colnames(worldcup_matches)[16] <- \"assistant2\"
+colnames(worldcup_matches)[19] <- \"home_team_initials\"
+colnames(worldcup_matches)[20] <- \"away_team_initials\"
+colnames(worldcup_matches)
+```"
+"1"," [1] \"Year\"                 \"Datetime\"             \"Stage\"                \"Stadium\"              \"City\"                 \"home_team_name\"       \"home_team_goals\"     
+ [8] \"away_team_goals\"      \"away_team_name\"       \"win_conditions\"       \"Attendance\"           \"half_time_home_goals\" \"half_time_away_goals\" \"Referee\"             
+[15] \"assistant1\"           \"assistant2\"           \"RoundID\"              \"MatchID\"              \"home_team_initials\"   \"away_team_initials\"   \"Date\"                
+[22] \"Time\"                 \"Goals\"                \"outcome\"             
+"
+"0","```r
+# Create the \"Goals\" column
+worldcup_matches$Goals <- worldcup_matches$home_team_goals + worldcup_matches$away_team_goals
+
+# Create the \"Match Outcome\" column
+worldcup_matches$outcome <- ifelse(worldcup_matches$home_team_goals > worldcup_matches$away_team_goals, \"Home Team Win\", \"Away Team Win\")
+
+
+```"

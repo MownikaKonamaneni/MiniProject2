@@ -1,0 +1,9 @@
+"0","```r
+# Convert the datetime column to a POSIXct object
+worldcup_matches$Datetime <- as.POSIXct(worldcup_matches$Datetime, format = \"%d %b %Y - %H:%M\", tz = \"UTC\")
+# Separate the datetime column into date and time
+worldcup_matches$Date <- as.Date(worldcup_matches$Datetime)
+worldcup_matches$Time <- format(worldcup_matches$Datetime, format = \"%H:%M\")
+
+worldcup_matches
+```"

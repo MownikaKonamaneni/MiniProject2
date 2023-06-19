@@ -1,0 +1,71 @@
+---
+title: "The Importance of Context"
+output: html_document
+---
+
+_From: Knaflic, C. N. (2015). Storytelling with data: A data visualization guide for business professionals. John Wiley & Sons_
+
+Before you begin down the path of creating a data visualization or communication, attention and time should be paid to understanding the **context** for the need to communicate.
+
+# Exploratory vs. explanatory analysis
+
+*Exploratory* analysis is what you do to understand the data and figure out what might be noteworthy or interesting to highlight to others. When we are at the point of communicating our analysis to our audience, we really want to be in the *explanatory* space, meaning you have a specific thing you want to explain, a specific story you want to tell.
+
+> **Recommended Reading:** For those interested in learning more about exploratory analysis, check out Nathan Yau’s book, [“Data Points”](https://flowingdata.com/data-points/). Yau focuses on data visualization as a medium, rather than a tool, and spends a good portion of the book discussing the data itself and strategies for exploring and analyzing it.
+
+# Who, what, and how
+
+When it comes to explanatory analysis, there are a few things to think about and be extremely clear on before visualizing any data or creating content.
+
+  1. *To whom are you communicating?* It is important to have a good understanding of who your audience is and how they perceive you. This can help you to identify common ground that will.
+
+  2. *What do you want your audience to know or do?* You should be clear how you want your audience to act and take into account how you will communicate to them and the overall tone that you want to set for your communication.
+
+  3. It’s only after you can concisely answer these first two questions that you’re ready to move forward with the third: *How can you use data to help make your point?*
+
+***
+
+# Who
+### Your Audience
+The more specific you can be about who your audience is, the better position you will be in for successful communication. Avoid general audiences, such as “internal and external stakeholders” or “anyone who might be interested”— by trying to communicate to too many different people with disparate needs at once, you put yourself in a position where you can’t communicate to any one of them as effectively as you could if you narrowed your target audience.
+
+### You
+It’s also helpful to think about the relationship that you have with your audience and how you expect that they will perceive you. Will you be encountering each other for the first time through this communication, or do you have an established relationship? Do they already trust you as an expert, or do you need to work to establish credibility?
+
+***
+
+# What
+
+### Action
+What do you need your audience to know or do? This is the point where you think through how to make what you communicate relevant for your audience and form a clear understanding of why they should care about what you say. You should always want your audience to know or do something. When it really isn’t appropriate to recommend an action explicitly, encourage discussion toward one.
+
+### Mechanism
+*How will you communicate to your audience?* The method you will use to communicate to your audience has implications on a number of factors, including the amount of control you will have over how the audience takes in the information and the level of detail that needs to be explicit.
+
+We can think of the communication mechanism along a continuum, with live presentation at the left and a written document or email at the right, as shown in the figure below:
+
+![Knaflic, 2015, page 24](https://raw.githubusercontent.com/reisanar/figs/master/knaflic_comm_continuum.png)
+
+**Live Presentation**
+
+  * Presenter is in full control
+    + what audience sees and when they see it
+    + Can respond to visual cues to speed up or slow down or go into more or less detail
+  * Level of detail necessary is low because any questions can be asked directly
+
+**Written Document or E-Mail**
+
+  * Presenter has less control
+  * Audience is in full control of how they consume information
+  * Level of detail required is much higher because no presenter to ask questions, document must answer frequent questions
+
+***
+
+# How
+
+Finally, after we can clearly articulate who our audience is and what we need them to know or do, we can turn to the data and ask the question: *What data is available that will help make my point?* Data becomes supporting evidence of the story you will build and tell.
+
+You might assume that showing only the data that backs up your point and ignoring the rest will make for a stronger case. I do not recommend this. Beyond being misleading by painting a one‐sided story, this is very risky. A discerning audience will poke holes in a story that doesn’t hold up or data that shows one aspect but ignores the rest. The right amount of context and supporting and opposing data will vary depending on the situation, the level of trust you have with your audience, and other factors.
+
+***
+

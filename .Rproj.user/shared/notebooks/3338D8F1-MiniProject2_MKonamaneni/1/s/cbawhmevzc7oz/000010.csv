@@ -1,0 +1,1 @@
+"0","mdl_data = dummy_cols(heart_data, select_columns=c( ""ChestPain"", ""Thal""), remove_selected_columns=TRUE)"

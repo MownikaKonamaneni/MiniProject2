@@ -1,0 +1,23 @@
+"0","```r
+
+# Group the data by country and calculate the average finishing time for each country
+country_avg_time <- marathon_data %>%
+  group_by(Country) %>%
+  summarise(Avg_Time = mean(Official_Time))
+
+# Sort the countries based on the average finishing time in ascending order
+sorted_countries <- country_avg_time %>%
+  arrange(Avg_Time)
+
+# Select the top 10 countries with the fastest runners
+top_10_countries <- head(sorted_countries, 10)
+
+# Create a bar plot for the top 10 countries with the fastest runners
+ggplot(top_10_countries, aes(x = reorder(Country, Avg_Time) , y = Avg_Time )) +
+  geom_bar(stat = \"identity\", fill = \"steelblue\") +
+  labs(title = \"Top 10 Countries with the Fastest Runners\",
+       x = \"Country\",
+       y = \"Average Finishing Time\") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_minimal()
+```"

@@ -1,0 +1,5 @@
+"0","#Load the data"
+"0",""
+"0","worldcup_matches <- read_csv(""data/WorldCupMatches.csv"")"
+"2","Error: 'data/WorldCupMatches.csv' does not exist in current working directory ('D:/Masters/Sem3').
+"

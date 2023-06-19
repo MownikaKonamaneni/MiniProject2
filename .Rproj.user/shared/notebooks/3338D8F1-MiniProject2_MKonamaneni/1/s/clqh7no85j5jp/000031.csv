@@ -1,0 +1,8 @@
+"0","# Bar chart of match outcome"
+"0","b <- ggplot(matches_countries_cleaned, aes(x = outcome, fill = outcome)) +"
+"0","  geom_bar( width = 0.3) +"
+"0","  labs(title = ""Match Outcome"","
+"0","       x = ""Outcome"", y = ""Count"") +"
+"0","  scale_fill_manual(values = c(""Home Team Win"" = ""steelblue"", ""Away Team Win"" = ""salmon"")) "
+"0",""
+"0","ggplotly(b)  "

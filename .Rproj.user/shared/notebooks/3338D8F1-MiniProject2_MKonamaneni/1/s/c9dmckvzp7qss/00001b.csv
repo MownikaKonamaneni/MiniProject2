@@ -1,0 +1,8 @@
+"0","# Create the bar chart"
+"0","Goals_plot <- ggplot(matches_countries_cleaned, aes(x = Year, y = Goals)) +"
+"0","  geom_bar(stat = ""identity"", fill = ""steelblue"") +"
+"0","  labs(title = ""Total Goals Scored Every Year (1930-2014)"","
+"0","       x = ""Year"", y = ""Goals"") +"
+"0","  theme_minimal()"
+"0",""
+"0","ggplotly(Goals_plot)"

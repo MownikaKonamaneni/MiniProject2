@@ -1,0 +1,6 @@
+"0","y_hat  = predict(mdl, mdl_data)"
+"0","pr = prediction(y_hat, mdl_data$AHD)"
+"0","auc <- performance(pr, measure = ""auc"")"
+"0","title = paste('AUC: ', auc@y.values[[1]])"
+"0","prf <- performance(pr, measure = ""tpr"", x.measure = ""fpr"")"
+"0","plot(prf, main=title)"

@@ -1,0 +1,301 @@
+---
+title: "Data Visualization Mini-Project 2"
+author: "Mownika Konamaneni - mkonamaneni4501@floridapoly.edu"
+output: html_notebook
+---
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(lubridate)
+library(sf)
+library(data.table)
+library(fastDummies)
+library(dotwhisker)
+library(ROCR)
+```
+
+```{r}
+#Load the data
+
+worldcup_matches <- read_csv("data/WorldCupMatches.csv")
+
+str(worldcup_matches)
+
+```
+
+Data cleaning and processing
+
+```{r}
+
+# Remove rows with empty values
+worldcup_matches <- worldcup_matches[!is.na(worldcup_matches$Year), ]
+
+```
+
+
+```{r}
+# Convert the datetime column to a POSIXct object
+worldcup_matches$Datetime <- as.POSIXct(worldcup_matches$Datetime, format = "%d %b %Y - %H:%M", tz = "UTC")
+# Separate the datetime column into date and time
+worldcup_matches$Date <- as.Date(worldcup_matches$Datetime)
+worldcup_matches$Time <- format(worldcup_matches$Datetime, format = "%H:%M")
+
+```
+
+
+
+```{r}
+# Assuming you want to rename the "Win conditions" column to "Outcome"
+colnames(worldcup_matches)[6] <- "home_team_name"
+colnames(worldcup_matches)[7] <- "home_team_goals"
+colnames(worldcup_matches)[8] <- "away_team_goals"
+colnames(worldcup_matches)[9] <- "away_team_name"
+colnames(worldcup_matches)[10] <- "win_conditions"
+colnames(worldcup_matches)[12] <- "half_time_home_goals"
+colnames(worldcup_matches)[13] <- "half_time_away_goals"
+colnames(worldcup_matches)[15] <- "assistant1"
+colnames(worldcup_matches)[16] <- "assistant2"
+colnames(worldcup_matches)[19] <- "home_team_initials"
+colnames(worldcup_matches)[20] <- "away_team_initials"
+colnames(worldcup_matches)
+
+# Create the "Goals" column
+worldcup_matches$Goals <- worldcup_matches$home_team_goals + worldcup_matches$away_team_goals
+
+# Create the "Match Outcome" column
+worldcup_matches$outcome <- ifelse(worldcup_matches$home_team_goals > worldcup_matches$away_team_goals, "Home Team Win", "Away Team Win")
+
+
+```
+```{r}
+# Calculate summary statistics
+summary(worldcup_matches$home_team_goals)
+summary(worldcup_matches$away_team_goals)
+
+```
+
+
+```{r}
+worldcup_matches = worldcup_matches %>% mutate(home_country=case_when(home_team_name %like% 'China' ~ "China"
+                                                                      , home_team_name=="C�te d'Ivoire" ~ 'Ivory Coast' 
+                                                                      , home_team_name %like% "Czech" ~ 'Czechia' 
+                                                                      , home_team_name=="England" ~ 'United Kingdom'
+                                                                      , home_team_name=="Scotland" ~ 'United Kingdom'
+                                                                      , home_team_name %like% "German" ~ 'Germany' 
+                                                                      , home_team_name %like% "Iran" ~ 'Iran'
+                                                                      , home_team_name %like% "Korea DPR" ~ 'North Korea'
+                                                                      , home_team_name %like% "Korea" ~ 'South Korea'
+                                                                      , home_team_name %like% "Ireland" ~ 'Ireland'
+                                                                      , home_team_name %like% "Serbia" ~ 'Republic of Serbia'
+                                                                      , home_team_name %like% "Yugoslavia" ~ 'Republic of Serbia'
+                                                                      , home_team_name %like% "Soviet Union" ~ 'Russia'
+                                                                      , home_team_name %like% "USA" ~ 'United States of America'
+                                                                      , home_team_name %like% "Wales" ~ 'United Kingdom'
+                                                                      , home_team_name %like% "Zaire" ~ 'Republic of the Congo'
+                                                                      , home_team_name %like% "Bosnia" ~ 'Bosnia and Herzegovina'
+                                                                      , home_team_name %like% "Trinidad and Tobago" ~ "Trinidad and Tobago"
+                                                                      , home_team_name %like% "United Arab Emirates" ~ "United Arab Emirates"
+                                                                      , home_team_name %like% "Dutch East Indies" ~ "Indonesia"
+                                                                      , TRUE ~ home_team_name
+                                                                      )
+                                               , away_country=case_when(away_team_name %like% 'China' ~ "China"
+                                                                      , away_team_name=="C�te d'Ivoire" ~ 'Ivory Coast' 
+                                                                      , away_team_name %like% "Czech" ~ 'Czechia' 
+                                                                      , away_team_name=="England" ~ 'United Kingdom'
+                                                                      , away_team_name=="Scotland" ~ 'United Kingdom'
+                                                                      , away_team_name %like% "German" ~ 'Germany' 
+                                                                      , away_team_name %like% "Iran" ~ 'Iran'
+                                                                      , away_team_name %like% "Korea DPR" ~ 'North Korea'
+                                                                      , away_team_name %like% "Korea" ~ 'South Korea'
+                                                                      , away_team_name %like% "Ireland" ~ 'Ireland'
+                                                                      , away_team_name %like% "Serbia" ~ 'Republic of Serbia'
+                                                                      , away_team_name %like% "Yugoslavia" ~ 'Republic of Serbia'
+                                                                      , away_team_name %like% "Soviet Union" ~ 'Russia'
+                                                                      , away_team_name %like% "USA" ~ 'United States of America'
+                                                                      , away_team_name %like% "Wales" ~ 'United Kingdom'
+                                                                      , away_team_name %like% "Zaire" ~ 'Republic of the Congo'
+                                                                      , away_team_name %like% "Bosnia" ~ 'Bosnia and Herzegovina'
+                                                                      , away_team_name %like% "Trinidad and Tobago" ~ "Trinidad and Tobago"
+                                                                      , away_team_name %like% "United Arab Emirates" ~ "United Arab Emirates"
+                                                                      , away_team_name %like% "Dutch East Indies" ~ "Indonesia"
+                                                                      , TRUE ~ away_team_name
+                                                                      ) 
+                                      )
+
+```
+
+```{r}
+world_shapes <- read_sf("data/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp")
+
+worldcup_away_goals <- worldcup_matches  %>% group_by(away_country) %>%summarise(average_goals = mean(away_team_goals))
+
+away_spatial_data <- world_shapes %>%
+  left_join(worldcup_away_goals, by = c("ADMIN" = "away_country")) %>%
+  filter(ISO_A3 != "ATA") 
+
+
+
+# Plot the map
+ggplot(away_spatial_data, aes(group = ADMIN)) +
+  geom_sf(aes(fill = average_goals)) +
+  coord_sf(crs = "+proj=robin") +
+  # scale_fill_viridis_c(option = "magma") +
+  scale_fill_gradient(low = "blue", high = "red", na.value = "gray", name = "Away Team Goals") +
+  ggtitle("Number of Away Team Goals in World Cup Matches") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+
+```
+
+```{r}
+
+worldcup_home_goals <- worldcup_matches  %>% group_by(home_country) %>%summarise(average_goals = mean(home_team_goals))
+
+
+home_spatial_data <- world_shapes %>%
+  left_join(worldcup_home_goals, by = c("ADMIN" = "home_country")) %>%
+  filter(ISO_A3 != "ATA") 
+
+
+
+# Plot the map
+ ggplot(home_spatial_data, aes(group = ADMIN)) +
+  geom_sf(aes(fill = average_goals)) +
+   coord_sf(crs = "+proj=robin") +
+  scale_fill_gradient(low = "blue", high = "red", na.value = "gray", name = "Home Team Goals") +
+  labs(title = "Number of Goals Scored by Home Teams in World Cup Matches") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+```
+
+
+```{r}
+# Bar chart of match outcome
+ggplot(matches_countries_cleaned, aes(x = outcome, fill = outcome)) +
+  geom_bar() +
+  labs(title = "Match Outcome",
+       x = "Outcome", y = "Count") +
+  scale_fill_manual(values = c("Home Team Win" = "steelblue", "Away Team Win" = "salmon"))
+```
+
+```{r}
+# Create the bar chart
+ggplot(matches_countries_cleaned, aes(x = Year, y = Goals)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Total Goals Scored Every Year (1930-2014)",
+       x = "Year", y = "Goals") +
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+Worldcup_goals_by_year <- matches_countries_cleaned %>%
+  group_by(Year) %>%
+  mutate(total_goals = sum(Goals))
+
+
+
+# Line plot: Number of goals over different years
+
+ggplot(Worldcup_goals_by_year, aes(x = Year, y = total_goals)) +
+  geom_line(color="blue") +
+  xlab("Year") + ylab("Number of Goals") +
+  ggtitle("Number of Goals Over Different Years") +
+  theme_minimal()
+
+```
+
+
+```{r}
+
+heart_data <- drop_na(read.csv("data/Heart.csv")[, -1])
+
+str(heart_data)
+```
+
+```{r}
+heart_data$AHD<-ifelse(heart_data$AHD=="Yes",1,0)
+summary(heart_data)
+```
+```{r}
+mdl_data = dummy_cols(heart_data, select_columns=c( "ChestPain", "Thal"), remove_selected_columns=TRUE)
+```
+
+```{r}
+mdl = glm(AHD ~., family=binomial(link='logit'), data=mdl_data)
+```
+
+```{r}
+summary(mdl)
+```
+## Model Coefficient plot
+```{r}
+dwplot(mdl)
+```
+
+
+## Area Under ROC curve
+```{r}
+y_hat  = predict(mdl, mdl_data)
+pr = prediction(y_hat, mdl_data$AHD)
+auc <- performance(pr, measure = "auc")
+title = paste('AUC: ', auc@y.values[[1]])
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf, main=title)
+```
+
+
+
+
+```{r}
+ggplot(heart_data
+       , aes(y=AHD, x=Age)
+       )+
+  geom_boxplot()
+```
+```{r}
+groupby_var = heart_data %>% group_by(Sex) %>% summarise(cou = n()
+                                           , no_hd = sum(AHD)
+                                           , hd_rate = sum(AHD)/n()
+                                           )
+ggplot(groupby_var
+       , aes(x=Sex, y=hd_rate)
+       )+
+  geom_bar(stat='identity')
+```
+```{r}
+groupby_var = heart_data %>% group_by(ChestPain) %>% summarise(hd_rate = sum(AHD)/n())
+ggplot(groupby_var
+       , aes(x=ChestPain, y=hd_rate)
+       )+
+  geom_bar(stat='identity')
+ggplot(heart_data
+       , aes(x=ChestPain)
+       )+
+  geom_bar(stat='identity')
+```
+
+
+
+
+
+

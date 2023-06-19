@@ -1,0 +1,15 @@
+"0","```r
+
+# Create a histogram to visualize the age distribution of finishers
+ggplot(marathon_data, aes(x = Age)) +
+  geom_histogram(aes(y = ..density..),
+                 binwidth = 2, 
+                 fill = \"green\", 
+                 color = \"black\", 
+                 alpha = 0.3) +
+  geom_density(color = \"red\") +
+  labs(title = \"Age Distribution of Finishers\",
+       x = \"Age\",
+       y = \"Count\") +
+  theme_minimal()
+```"

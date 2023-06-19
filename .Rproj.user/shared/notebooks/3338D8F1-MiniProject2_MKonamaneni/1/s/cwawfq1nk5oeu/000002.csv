@@ -1,0 +1,27 @@
+"0","```r
+world_cup_matches = world_cup_matches %>% mutate(home_country=case_when(home_team_name %like% 'China' ~ \"China\"
+                                                , home_team_name==\"C�te d'Ivoire\" ~ 'Ivory Coast' 
+                                                , home_team_name %like% \"Czech\" ~ 'Czechia' 
+                                                , home_team_name==\"England\" ~ 'United Kingdom'
+                                                , home_team_name==\"Scotland\" ~ 'United Kingdom'
+                                                , home_team_name %like% \"German\" ~ 'Germany' 
+                                                , home_team_name %like% \"Iran\" ~ 'Iran'
+                                                , home_team_name %like% \"Korea DPR\" ~ 'North Korea'
+                                                , home_team_name %like% \"Korea\" ~ 'South Korea'
+                                                , home_team_name %like% \"Ireland\" ~ 'Ireland'
+                                                , home_team_name %like% \"Serbia\" ~ 'Republic of Serbia'
+                                                , home_team_name %like% \"Yugoslavia\" ~ 'Republic of Serbia'
+                                                , home_team_name %like% \"Soviet Union\" ~ 'Russia'
+                                                , home_team_name %like% \"USA\" ~ 'United States of America'
+                                                , home_team_name %like% \"Wales\" ~ 'United Kingdom'
+                                                , home_team_name %like% \"Zaire\" ~ 'Republic of the Congo'
+                                                , home_team_name %like% \"Bosnia\" ~ 'Bosnia and Herzegovina'
+                                                , home_team_name %like% \"Trinidad and Tobago\" ~ \"Trinidad and Tobago\"
+                                                , home_team_name %like% \"United Arab Emirates\" ~ \"United Arab Emirates\"
+                                                , TRUE ~ home_team_name
+                                                                      )
+                                      )
+
+```"
+"1","Error: object 'world_cup_matches' not found
+"

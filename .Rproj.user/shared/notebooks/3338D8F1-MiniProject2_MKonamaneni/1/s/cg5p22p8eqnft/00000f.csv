@@ -1,0 +1,1 @@
+"0","mdl = glm(AHD ~., family=binomial(link='logit'), data=mdl_data)"

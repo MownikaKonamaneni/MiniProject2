@@ -1,0 +1,4 @@
+"0",""
+"0","# Remove rows with empty values"
+"0","worldcup_matches <- worldcup_matches[!is.na(worldcup_matches$Year), ]"
+"0",""

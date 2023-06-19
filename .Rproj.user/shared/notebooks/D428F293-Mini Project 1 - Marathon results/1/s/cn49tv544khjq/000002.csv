@@ -1,0 +1,11 @@
+"0","```r
+gender_group_counts <- marathon_data %>%
+  count(M_F)
+
+#create bar chart
+ggplot(gender_group_counts, aes(x=M_F, y=n, fill=M_F), size = ) +
+  geom_bar(stat=\"identity\", show.legend = FALSE, width = 0.3) +
+  labs(title = \"Gender-specific finishers\", x = \"Gender\", y = \"Count\" ) +
+  theme_minimal()
+
+```"

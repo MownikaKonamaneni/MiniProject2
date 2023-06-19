@@ -1,0 +1,5 @@
+"0","# Create the ""Goals"" column"
+"0","worldcup_matches$Goals <- worldcup_matches$home_team_goals + worldcup_matches$away_team_goals"
+"0",""
+"0","# Create the ""Match Outcome"" column"
+"0","worldcup_matches$outcome <- ifelse(worldcup_matches$home_team_goals > worldcup_matches$away_team_goals, ""Home Team Win"", ""Away Team Win"")"

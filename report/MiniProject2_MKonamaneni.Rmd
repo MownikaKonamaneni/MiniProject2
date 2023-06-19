@@ -1,0 +1,342 @@
+---
+title: "Data Visualization Mini-Project 2"
+author: "Mownika Konamaneni - mkonamaneni4501@floridapoly.edu"
+output: html_notebook
+---
+
+# Data Visualization - Mini Project 2
+
+This project is aims to:
+
+* Analyze the World cup matches data from 1930 to 2014. The dataset used for analysis is "WorldCupMatches.csv".
+
+* Visualization of Model fitting on Heart disease diagnostic data and its coefficient plot.
+
+The main objective of this projects are to:
+
+1. Visualize the average number of goals scored by the away team and the home team on maps.
+2. Analyze the number of matches won by the home team and the away team as the outcome of the match.
+3. Determine the total number of goals scored in each match.
+4. Analyze the heart disease prediction dataset.
+5. Fit a model to the heart disease data and determine its coefficients and metrics. 
+
+
+## Data Loading
+The project starts by loading the necessary libraries. These libraries provide functions for data manipulation and visualization, respectively. 
+
+```{r, , results='hide', message=FALSE, warning=FALSE}
+# Load libraries
+library(tidyverse)
+library(lubridate)
+library(sf)
+library(data.table)
+library(fastDummies)
+library(dotwhisker)
+library(ROCR)
+```
+
+```{r, , message=FALSE, warning = FALSE}
+#Load the data
+
+worldcup_matches <- read_csv("data/WorldCupMatches.csv")
+
+str(worldcup_matches)
+
+```
+
+## Data cleaning and processing
+
+The data cleaning and processing steps include the following:
+
+Empty rows has been removed from the dataset
+```{r, echo=TRUE}
+
+# Remove rows with empty values
+worldcup_matches <- worldcup_matches[!is.na(worldcup_matches$Year), ]
+
+```
+
+Converted Datetime column into Date column and Time column with appropriate format 
+```{r, message=FALSE, warning = FALSE}
+# Convert the datetime column to a POSIXct object
+worldcup_matches$Datetime <- as.POSIXct(worldcup_matches$Datetime, format = "%d %b %Y - %H:%M", tz = "UTC")
+# Separate the datetime column into date and time
+worldcup_matches$Date <- as.Date(worldcup_matches$Datetime)
+worldcup_matches$Time <- format(worldcup_matches$Datetime, format = "%H:%M")
+
+```
+
+Renaming specific column names for clarity
+
+```{r, message=FALSE, warning = FALSE}
+# Assuming you want to rename the "Win conditions" column to "Outcome"
+colnames(worldcup_matches)[6] <- "home_team_name"
+colnames(worldcup_matches)[7] <- "home_team_goals"
+colnames(worldcup_matches)[8] <- "away_team_goals"
+colnames(worldcup_matches)[9] <- "away_team_name"
+colnames(worldcup_matches)[10] <- "win_conditions"
+colnames(worldcup_matches)[12] <- "half_time_home_goals"
+colnames(worldcup_matches)[13] <- "half_time_away_goals"
+colnames(worldcup_matches)[15] <- "assistant1"
+colnames(worldcup_matches)[16] <- "assistant2"
+colnames(worldcup_matches)[19] <- "home_team_initials"
+colnames(worldcup_matches)[20] <- "away_team_initials"
+colnames(worldcup_matches)
+
+```
+Creating Goals column by adding home team goals and away team goals 
+
+```{r, message=FALSE, warning = FALSE}
+# Create the "Goals" column
+worldcup_matches$Goals <- worldcup_matches$home_team_goals + worldcup_matches$away_team_goals
+
+# Create the "Match Outcome" column
+worldcup_matches$outcome <- ifelse(worldcup_matches$home_team_goals > worldcup_matches$away_team_goals, "Home Team Win", "Away Team Win")
+```
+
+
+```{r, message=FALSE, warning = FALSE}
+# Calculate summary statistics
+summary(worldcup_matches$home_team_goals)
+summary(worldcup_matches$away_team_goals)
+
+```
+
+From above summary statistics we can determine that maximum number of goals scored by home team are 10 and Away team scored 7.   
+
+Cleaning the dataset by replacing the old names of country with current names to map them with number of goals scored. 
+```{r}
+worldcup_matches = worldcup_matches %>% mutate(home_country=case_when(home_team_name %like% 'China' ~ "China"
+                                                                      , home_team_name=="C�te d'Ivoire" ~ 'Ivory Coast' 
+                                                                      , home_team_name %like% "Czech" ~ 'Czechia' 
+                                                                      , home_team_name=="England" ~ 'United Kingdom'
+                                                                      , home_team_name=="Scotland" ~ 'United Kingdom'
+                                                                      , home_team_name %like% "German" ~ 'Germany' 
+                                                                      , home_team_name %like% "Iran" ~ 'Iran'
+                                                                      , home_team_name %like% "Korea DPR" ~ 'North Korea'
+                                                                      , home_team_name %like% "Korea" ~ 'South Korea'
+                                                                      , home_team_name %like% "Ireland" ~ 'Ireland'
+                                                                      , home_team_name %like% "Serbia" ~ 'Republic of Serbia'
+                                                                      , home_team_name %like% "Yugoslavia" ~ 'Republic of Serbia'
+                                                                      , home_team_name %like% "Soviet Union" ~ 'Russia'
+                                                                      , home_team_name %like% "USA" ~ 'United States of America'
+                                                                      , home_team_name %like% "Wales" ~ 'United Kingdom'
+                                                                      , home_team_name %like% "Zaire" ~ 'Republic of the Congo'
+                                                                      , home_team_name %like% "Bosnia" ~ 'Bosnia and Herzegovina'
+                                                                      , home_team_name %like% "Trinidad and Tobago" ~ "Trinidad and Tobago"
+                                                                      , home_team_name %like% "United Arab Emirates" ~ "United Arab Emirates"
+                                                                      , home_team_name %like% "Dutch East Indies" ~ "Indonesia"
+                                                                      , TRUE ~ home_team_name
+                                                                      )
+                                               , away_country=case_when(away_team_name %like% 'China' ~ "China"
+                                                                      , away_team_name=="C�te d'Ivoire" ~ 'Ivory Coast' 
+                                                                      , away_team_name %like% "Czech" ~ 'Czechia' 
+                                                                      , away_team_name=="England" ~ 'United Kingdom'
+                                                                      , away_team_name=="Scotland" ~ 'United Kingdom'
+                                                                      , away_team_name %like% "German" ~ 'Germany' 
+                                                                      , away_team_name %like% "Iran" ~ 'Iran'
+                                                                      , away_team_name %like% "Korea DPR" ~ 'North Korea'
+                                                                      , away_team_name %like% "Korea" ~ 'South Korea'
+                                                                      , away_team_name %like% "Ireland" ~ 'Ireland'
+                                                                      , away_team_name %like% "Serbia" ~ 'Republic of Serbia'
+                                                                      , away_team_name %like% "Yugoslavia" ~ 'Republic of Serbia'
+                                                                      , away_team_name %like% "Soviet Union" ~ 'Russia'
+                                                                      , away_team_name %like% "USA" ~ 'United States of America'
+                                                                      , away_team_name %like% "Wales" ~ 'United Kingdom'
+                                                                      , away_team_name %like% "Zaire" ~ 'Republic of the Congo'
+                                                                      , away_team_name %like% "Bosnia" ~ 'Bosnia and Herzegovina'
+                                                                      , away_team_name %like% "Trinidad and Tobago" ~ "Trinidad and Tobago"
+                                                                      , away_team_name %like% "United Arab Emirates" ~ "United Arab Emirates"
+                                                                      , away_team_name %like% "Dutch East Indies" ~ "Indonesia"
+                                                                      , TRUE ~ away_team_name
+                                                                      ) 
+                                      )
+
+```
+
+
+### Visualization of Average number of Away team goals and Home team goals in Maps 
+
+The average number of goals scored by the away team is visualized on a map using the world shapefile data from [Natural Earth](https://www.naturalearthdata.com/).
+The "average_goals" variable calculated from the World Cup matches data by aggregating the home team and away team goals based on the country and marked them on map by grouping with country.
+```{r, message=FALSE, warning = FALSE}
+world_shapes <- read_sf("data/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp")
+
+worldcup_away_goals <- worldcup_matches  %>% group_by(away_country) %>%summarise(average_goals = mean(away_team_goals))
+
+away_spatial_data <- world_shapes %>%
+  left_join(worldcup_away_goals, by = c("ADMIN" = "away_country")) %>%
+  filter(ISO_A3 != "ATA") 
+
+
+
+# Plot the map
+ggplot(away_spatial_data, aes(group = ADMIN)) +
+  geom_sf(aes(fill = average_goals)) +
+  coord_sf(crs = "+proj=robin") +
+  scale_fill_gradient(low = "blue", high = "red", na.value = "gray", name = "Away Team Goals") +
+  ggtitle("Average Number of Away Team Goals in World Cup Matches") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+
+```
+
+From the above map we can see that Germany scored highest avaerage number of goals in the worldcup matches followed by Netherlands and Brazil. 
+
+
+
+```{r, message=FALSE, warning = FALSE}
+
+worldcup_home_goals <- worldcup_matches  %>% group_by(home_country) %>%summarise(average_goals = mean(home_team_goals))
+
+
+home_spatial_data <- world_shapes %>%
+  left_join(worldcup_home_goals, by = c("ADMIN" = "home_country")) %>%
+  filter(ISO_A3 != "ATA") 
+
+
+
+# Plot the map
+ ggplot(home_spatial_data, aes(group = ADMIN)) +
+  geom_sf(aes(fill = average_goals)) +
+   coord_sf(crs = "+proj=robin") +
+  scale_fill_gradient(low = "blue", high = "red", na.value = "gray", name = "Home Team Goals") +
+  labs(title = "Average Number of Goals Scored by Home Teams in World Cup Matches") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 18, face = "bold"),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+```
+
+From the above map we can see that Turkey scored highest avaerage number of goals in the worldcup matches followed by Hungary.
+
+Analyze the number of matches won by Home team and Away team as outcome of the match
+
+```{r, message=FALSE, warning = FALSE, fig.width = 10, fig.height = 5}
+# Bar chart of match outcome
+b <- ggplot(matches_countries_cleaned, aes(x = outcome, fill = outcome)) +
+  geom_bar( width = 0.3) +
+  labs(title = "Match Outcome",
+       x = "Outcome", y = "Count") +
+  scale_fill_manual(values = c("Home Team Win" = "steelblue", "Away Team Win" = "salmon")) 
+
+ggplotly(b)  
+```
+The total number of goals scored in each year from 1930 to 2014 is visualized using a bar chart. The chart depicts the trend of goals scored over time.
+```{r, message=FALSE, warning = FALSE, fig.width = 10, fig.height = 5}
+# Create the bar chart
+Goals_plot <- ggplot(matches_countries_cleaned, aes(x = Year, y = Goals)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Total Goals Scored Every Year (1930-2014)",
+       x = "Year", y = "Goals") +
+  theme_minimal()
+
+ggplotly(Goals_plot)
+
+```
+
+As we can see from above plot, there are more number of goals scored in the year 2000. The worldcup games has been held every four years, except for the years 1942 and 1946, during World War II. due that we dont see any data for that period in the plot. 
+
+
+
+```{r, message=FALSE, warning = FALSE, fig.width = 10, fig.height = 5}
+Worldcup_goals_by_year <- matches_countries_cleaned %>%
+  group_by(Year) %>%
+  mutate(total_goals = sum(Goals))
+
+
+
+# Line plot: Number of goals over different years
+
+l <- ggplot(Worldcup_goals_by_year, aes(x = Year, y = total_goals)) +
+  geom_line(color="blue") +
+  xlab("Year") + ylab("Number of Goals") +
+  ggtitle("Number of Goals Over Different Years") +
+  theme_minimal()
+
+ggplotly(l)
+
+```
+
+The above plot shows us the number of goals scored in world cup over the years 1930 to 2014. 
+
+
+## Heart disease data set analysis and pre-processing 
+
+
+```{r, message=FALSE, warning = FALSE}
+
+heart_data <- drop_na(read.csv("data/Heart.csv")[, -1])
+
+str(heart_data)
+```
+
+The dataset is preprocessed by converting the "AHD" (heart disease diagnosis) column into binary values (0 for "No" and 1 for "Yes") becasue the target variable is in character format. .
+
+```{r, message=FALSE, warning = FALSE}
+heart_data$AHD<-ifelse(heart_data$AHD=="Yes",1,0)
+summary(heart_data)
+```
+
+Since the Chestpain and Thal are the catagorical variables creating dummy variables into numeric variable to fit the model using those variables. 
+
+```{r, message=FALSE, warning = FALSE}
+mdl_data = dummy_cols(heart_data, select_columns=c( "ChestPain", "Thal"), remove_selected_columns=TRUE)
+```
+### Model Fitting and Coefficient Plot
+
+A logistic regression model is fitted to the heart disease data using the glm() function. The model's coefficients and summary statistics are displayed. Additionally, a coefficient plot is generated to visualize the coefficients.
+
+```{r, message=FALSE, warning = FALSE}
+mdl = glm(AHD ~., family=binomial(link='logit'), data=mdl_data)
+```
+
+Summary for the model coefficients, 
+
+```{r, message=FALSE, warning = FALSE}
+summary(mdl)
+```
+## Model Coefficient plot
+```{r, message=FALSE, warning = FALSE}
+dwplot(mdl)
+```
+
+From above coefficient plot and summary we can clearly identify Sex, Ca, ChestPain_asymptomic and Thal_normal are the most siginificant varibales for the model prediction. 
+
+## Area Under ROC curve
+```{r}
+y_hat  = predict(mdl, mdl_data)
+pr = prediction(y_hat, mdl_data$AHD)
+auc <- performance(pr, measure = "auc")
+title = paste('AUC: ', auc@y.values[[1]])
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf, main=title)
+```
+
+The area under the receiver operating characteristic (ROC) curve is calculated to evaluate the model's performance. The ROC  is a metric used to evaluate the performance of a classification model. The ROC curve is created by plotting the True Positive Rate (Sensitivity) against the False Positive Rate (1 - Specificity) at various classification thresholds.
+
+
+AUC-ROC > 0.5: The model performs better than random guessing. The higher the value, the better the performance.
+
+As we can see this model generated AUC-ROC = 0.933 which is a good prediction. 
+
+# Conclusion
+
+The project successfully analyzes World Cup matches data and visualizes the average number of goals scored by the home team and away team on maps. Additionally, it performs model fitting and visualization on heart disease diagnostic data, providing insights into heart disease prediction. The visualizations and analyses contribute to a better understanding of the datasets and their patterns.
+
+
+
+
+

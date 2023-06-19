@@ -1,0 +1,9 @@
+"0","```r
+# Create a bar plot using ggplot
+ggplot(age_group_counts, aes(x = Age, y = n)) +
+  geom_bar(stat = \"identity\", fill = \"steelblue\") +
+  labs(title = \"Number of Finishers by Age Group\",
+       x = \"Age Group\",
+       y = \"Count\") +
+  theme_minimal()
+```"
